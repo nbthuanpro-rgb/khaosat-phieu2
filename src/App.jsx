@@ -6,7 +6,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_PshFpqGI5igv7fKiIGPsaQ_wouAItW1'
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // true = đã hết hạn khảo sát
-const SURVEY_CLOSED = true
+const SURVEY_CLOSED = true // đã khóa
 
 export default function App() {
   const [view, setView] = useState(SURVEY_CLOSED ? 'closed' : 'form')
