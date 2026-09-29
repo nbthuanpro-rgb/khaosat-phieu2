@@ -10,7 +10,6 @@ const SURVEY_CLOSED = true
 
 export default function App() {
   const [view, setView] = useState(SURVEY_CLOSED ? 'closed' : 'form')
-  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState({ total: 0 })
 
@@ -18,12 +17,11 @@ export default function App() {
     setLoading(true)
     try {
       const { data, error } = await supabase
-        .from('khao_sat_phieu1')
+        .from('khao_sat_phieu2')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setResults(data || [])
       calculateStats(data || [])
     } catch (err) {
       console.error(err)
@@ -59,10 +57,7 @@ export default function App() {
 
     setStats({
       total,
-      co_quan: count('co_quan'),
-      cap_cong_tac: count('cap_cong_tac'),
-      nganh: count('nganh'),
-      thoi_gian: count('thoi_gian'),
+      nhom_nghe: count('nhom_nghe') || count('cau2') || count('doi_tuong'),
       cau1: count('cau1'),
       cau2: count('cau2'),
       cau3: count('cau3'),
@@ -81,7 +76,6 @@ export default function App() {
     })
   }
 
-  // Component hiển thị 1 câu hỏi có thanh tiến trình
   const QuestionStat = ({ title, data }) => {
     if (!data || Object.keys(data).length === 0) return null
     const total = stats.total || 1
@@ -139,17 +133,16 @@ export default function App() {
     )
   }
 
-  // ========== MÀN HÌNH KẾT QUẢ ĐẦY ĐỦ ==========
+  // ========== MÀN HÌNH KẾT QUẢ ==========
   if (view === 'results') {
     return (
       <div className="min-h-screen bg-gray-100 py-6 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
-          {/* Header */}
           <div className="bg-white rounded-xl shadow-sm border-t-4 border-red-700 p-5 sm:p-6 mb-4">
             <div className="flex justify-between items-start gap-3">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-red-800">Kết quả khảo sát</h1>
-                <p className="text-sm text-gray-600 mt-1">Phiếu số 01 – UBND phường Thành Nhất</p>
+                <p className="text-sm text-gray-600 mt-1">Phiếu số 02 – UBND phường Thành Nhất</p>
               </div>
               <button
                 onClick={() => setView('closed')}
@@ -173,34 +166,29 @@ export default function App() {
             </div>
           ) : (
             <div className="space-y-4">
-              {/* A. Thông tin chung */}
               <div className="bg-white rounded-xl shadow-sm p-5 sm:p-6">
                 <h2 className="text-lg font-bold text-red-800 mb-5 border-b border-red-100 pb-2">A. Thông tin chung</h2>
-                
-                <QuestionStat title="2. Cấp công tác" data={stats.cap_cong_tac} />
-                <QuestionStat title="3. Ngành/lĩnh vực quản lý hoặc công tác chủ yếu" data={stats.nganh} />
-                <QuestionStat title="4. Thời gian tham gia công tác liên quan đến an toàn thực phẩm" data={stats.thoi_gian} />
+                <QuestionStat title="2. Nhóm nghề nghiệp/đối tượng khảo sát" data={stats.nhom_nghe} />
               </div>
 
-              {/* B. Phần khảo sát */}
               <div className="bg-white rounded-xl shadow-sm p-5 sm:p-6">
                 <h2 className="text-lg font-bold text-red-800 mb-5 border-b border-red-100 pb-2">B. Phần khảo sát</h2>
 
-                <QuestionStat title="Câu 1. Đơn vị/địa phương đã tuyên truyền, phổ biến pháp luật về an toàn thực phẩm bằng hình thức nào?" data={stats.cau1} />
-                <QuestionStat title="Câu 2. Ông/bà đánh giá về hiệu quả của hoạt động tuyên truyền, phổ biến pháp luật về an toàn thực phẩm thời gian qua?" data={stats.cau2} />
-                <QuestionStat title="Câu 3. Ông/bà đánh giá về việc bố trí nguồn lực thực hiện công tác thi hành pháp luật về an toàn thực phẩm tại đơn vị/địa phương?" data={stats.cau3} />
-                <QuestionStat title="Câu 4. Lý do việc bố trí nguồn lực chưa bảo đảm" data={stats.cau4} />
-                <QuestionStat title="Câu 5. Các hành vi vi phạm pháp luật trong quản lý thực phẩm chức năng đã xảy ra thời gian qua" data={stats.cau5} />
-                <QuestionStat title="Câu 6. Những khó khăn, vướng mắc thường gặp trong công tác quản lý thực phẩm chức năng" data={stats.cau6} />
-                <QuestionStat title="Câu 7. Các hành vi vi phạm pháp luật trong kiểm nghiệm thực phẩm đã xảy ra" data={stats.cau7} />
-                <QuestionStat title="Câu 8. Hành vi vi phạm tại các cơ sở không thuộc diện cấp Giấy chứng nhận cơ sở đủ điều kiện an toàn thực phẩm" data={stats.cau8} />
-                <QuestionStat title="Câu 9. Khó khăn, vướng mắc trong quản lý cơ sở không thuộc diện cấp Giấy chứng nhận" data={stats.cau9} />
-                <QuestionStat title="Câu 10. Đánh giá về việc triển khai và hiệu quả công tác thanh tra, kiểm tra" data={stats.cau10} />
-                <QuestionStat title="Câu 11. Các hình thức xử lý vi phạm pháp luật về an toàn thực phẩm đã áp dụng" data={stats.cau11} />
-                <QuestionStat title="Câu 12. Đánh giá về tính kịp thời, hiệu quả khi áp dụng Nghị định số 90/2026/NĐ-CP" data={stats.cau12} />
-                <QuestionStat title="Câu 13. Nguyên nhân chủ yếu dẫn đến vi phạm pháp luật về an toàn thực phẩm" data={stats.cau13} />
-                <QuestionStat title="Câu 14. Đánh giá về hoạt động phối hợp giữa các cơ quan, đơn vị" data={stats.cau14} />
-                <QuestionStat title="Câu 15. Giải pháp nâng cao hiệu lực, hiệu quả quản lý nhà nước về an toàn thực phẩm" data={stats.cau15} />
+                <QuestionStat title="Câu 1. Ông/bà có được tuyên truyền, phổ biến quy định pháp luật về an toàn thực phẩm tại địa phương không?" data={stats.cau1} />
+                <QuestionStat title="Câu 2. Ông/bà được tiếp cận thông tin, quy định pháp luật về an toàn thực phẩm qua hình thức nào?" data={stats.cau2} />
+                <QuestionStat title="Câu 3. Ông/bà đánh giá hiệu quả tuyên truyền, phổ biến pháp luật về an toàn thực phẩm" data={stats.cau3} />
+                <QuestionStat title="Câu 4. Ông/bà có biết hoặc từng sử dụng thực phẩm chức năng không?" data={stats.cau4} />
+                <QuestionStat title="Câu 5. Ông/bà thường mua hoặc tiếp cận thông tin về thực phẩm chức năng qua kênh nào?" data={stats.cau5} />
+                <QuestionStat title="Câu 6" data={stats.cau6} />
+                <QuestionStat title="Câu 7" data={stats.cau7} />
+                <QuestionStat title="Câu 8" data={stats.cau8} />
+                <QuestionStat title="Câu 9" data={stats.cau9} />
+                <QuestionStat title="Câu 10" data={stats.cau10} />
+                <QuestionStat title="Câu 11" data={stats.cau11} />
+                <QuestionStat title="Câu 12" data={stats.cau12} />
+                <QuestionStat title="Câu 13" data={stats.cau13} />
+                <QuestionStat title="Câu 14" data={stats.cau14} />
+                <QuestionStat title="Câu 15" data={stats.cau15} />
               </div>
 
               <div className="text-center pt-2 pb-6">
